@@ -1,0 +1,2 @@
+class UserWatchList < Activity
+end

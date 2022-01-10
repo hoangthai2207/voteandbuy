@@ -1,0 +1,52 @@
+version: '3'
+services:
+  db:
+    image: mysql:8
+    container_name: db_vote_and_by
+    command: mysqld --skip-character-set-client-handshake --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
+    tty: true
+    volumes:
+      - data-db:/var/lib/mysql
+    ports:
+      - 4000:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    networks:
+      - nginx_network
+
+  app:
+    container_name: app_vote_and_by
+    image: vote_and_by
+    command: >
+      sh -c 'rm -f tmp/pids/server.pid;
+              bundle install --jobs 4 &&
+              /bin/sh'
+    tty: true
+    depends_on:
+      - db
+    stdin_open: true
+    working_dir: /app
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile
+    volumes:
+      - .:/app
+      - db-bundle:/usr/local/bundle
+    ports:
+      - 3000:3000
+    environment:
+      DATABASE_HOST: db
+      DATABASE_USER_NAME: root
+      DATABASE_PASSWORD:
+    networks:
+      - nginx_network
+
+volumes:
+  data-db:
+    driver: local
+  db-bundle:
+    driver: local
+
+networks:
+  nginx_network:
+    driver: bridge

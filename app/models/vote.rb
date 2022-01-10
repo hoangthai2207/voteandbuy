@@ -1,0 +1,2 @@
+class Vote < Activity
+end
